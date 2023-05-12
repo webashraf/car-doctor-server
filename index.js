@@ -72,6 +72,22 @@ async function run() {
       res.send(result);
     })
 
+
+    app.patch("/order/:id", async(req, res) => {
+      const id = req.params.id;
+      const orderStatus = req.body;
+      console.log(orderStatus.status);
+      const filter = {_id: new ObjectId(id)};
+      const updatedDocs = {
+        $set : {
+          status: orderStatus.status
+        }
+      };
+      const result = await orderCollection.updateOne(filter, updatedDocs);
+      res.send(result);
+    })
+
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
