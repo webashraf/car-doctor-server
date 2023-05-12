@@ -26,6 +26,9 @@ async function run() {
     await client.connect();
 
     const servicesCollection = client.db("carDoctors").collection("services");
+    const orderCollection = client.db("carDoctors").collection("bookings");
+
+  
 
     app.get("/services", async(req, res) =>{
         const cursor = servicesCollection.find();
@@ -33,22 +36,41 @@ async function run() {
         res.send(result)
     })
 
+    
+    
     app.get("/services/:id", async(req, res) => {
-        const id = req.params.id;
-        const query = {_id: new ObjectId(id)};
-        const options = {
-            projection: {title: 1, service_id: 1, price: 1},
-        }
-
-        const result = await servicesCollection.findOne(query, options);
-        res.send(result)
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await servicesCollection.findOne(query);
+      res.send(result)
+    })
+    
+    
+    
+    app.post('/order', async(req, res) =>{
+      const chekout = req.body;
+      // console.log(chekout);
+      const result = await orderCollection.insertOne(chekout);
+      res.send(result);
     })
 
 
+    app.get("/order", async(req, res) =>{
+      // console.log(req.query);
+      let quary = {}
+      if (req.query?.email) {
+        quary = {email : req.query.email}
+      }
+      const result = await orderCollection.find(quary).toArray();
+      res.send(result)
+    })
 
-
-
-
+    app.delete("/order/:id", async(req, res) => {
+      const id = req.params.id;
+      const quary = {_id : new ObjectId(id)};
+      const result = orderCollection.deleteOne(quary);
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
